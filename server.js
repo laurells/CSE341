@@ -6,7 +6,7 @@ const mongodb = require('./DB/connection');
 const app = express();
 //Set the port number for the server to listen on. Use the value of the 'PORT' environment variable if available, otherwise use port 3000 as a default.
 mongodb();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 // Registers a middleware function using 'app.use()' that handles all incoming HTTP requests with the '/' (root) path and delegates the handling of these requests to a separate file or module located at './routes'.
 app
     .use(bodyParser.json())
