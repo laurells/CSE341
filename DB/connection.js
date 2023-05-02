@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const MongoClient = require('mongodb').MongoClient;
-const MONGODB_URI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.1g9t77n.mongodb.net/${process.env.MONGODB_DB}?retryWrites=true&w=majority`
+const uri = process.env.MONGODB_URI;
 let _db;
 
 const initDb = (callback) => {
@@ -9,7 +9,12 @@ const initDb = (callback) => {
     console.log('Db is already initialized!');
     return callback(null, _db);
   }
-  MongoClient.connect(MONGODB_URI)
+
+  if (!uri){
+    console.log('MONGODB_URI is not defined in .env');
+    return callback('Missing environment variable MONGODB_URI');
+  }
+  MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(client => {
       _db = client;
       callback(null, _db);
