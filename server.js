@@ -1,9 +1,9 @@
+// set up a server using the Express framework. 
+//set up some middleware to handle HTTP requests and responses.
 const express = require('express');
-// const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongodb = require('./DB/connection');
-
-// eslint-disable-next-line no-undef
+//the server should listen for requests on a port that is either specified in an environment variable or defaults to port 3000
 const port = process.env.PORT || 3000;
 const app = express();
 
@@ -20,8 +20,11 @@ app
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONs');
         next();
     })
+    // use app.use() to register the middleware and routes for the app.
     .use('/', require('./routes'));
 
+//initialize the MongoDB database connection and starts the server if the connection is successful. 
+//if there's an error connecting to the database, it logs the error to the console.
 mongodb.initDb((err, mongodb) => {
     if (err) {
         console.log(err);

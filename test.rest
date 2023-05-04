@@ -1,6 +1,10 @@
 //Get all contacts
 GET http://localhost:3000/contact
 ###
-//Get Contacts by id
+//Get Contacts by ID
 GET http://localhost:3000/contact/644faaa3e7f43a0e5b67a9b8
+###
+//Get all contacts using render
+GET https://codewithlaurels-srvc.onrender.com/contact
+//Get contacts by ID using render
 

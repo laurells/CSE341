@@ -1,3 +1,6 @@
+//This code exports a module that provides a simple interface for connecting to a MongoDB database using the official MongoDB driver for Node.js.
+
+//import the 'dotenv' package and call its 'config' method, which loads environment variables from a .env file into the process.env object.
 const dotenv = require('dotenv');
 dotenv.config();
 const MongoClient = require('mongodb').MongoClient;
