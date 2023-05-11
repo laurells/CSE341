@@ -14,7 +14,7 @@ app
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader(
             'Access-Control-Allow-Headers',
-            'Origin, X-Requested-With, Content-Type, Acccept, Z-Key'
+            'Origin, X-Requested-With, Content-Type, Accept, Z-Key'
         );
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONs');
@@ -25,7 +25,7 @@ app
 
 //initialize the MongoDB database connection and starts the server if the connection is successful. 
 //if there's an error connecting to the database, it logs the error to the console.
-mongodb.initDb((err, mongodb) => {
+mongodb.initDb((err) => {
     if (err) {
         console.log(err);
     } else {
