@@ -18,8 +18,12 @@ POST http://localhost:3000/contact HTTP/1.1 Content-Type: application/json
 
 {"firstName":"Jane","lastName":"Smiths","email":"janesmiths@gmail.com","favoriteColor":"green","birthday": "1995-05-10"}
 
-###
+### CREATE A RANDOM CONTACT WITH FAKE DATA
 POST  http://localhost:3000/contact-generator HTTP/1.1 Content-Type: application/json
+### CREATE A RANDOM CONTACT WITH FAKE DATA ON RENDER
+POST https://codewithlaurels-srvc.onrender.com/contact-generator
+###
+GET https://localhost:3000/api-docs
 
 
 

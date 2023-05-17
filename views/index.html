@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Site</title>
+    <style>
+        body {
+            background-color: ghostwhite;
+        }
+
+        .page-container {
+            background-color: ghostwhite;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 3em;
+        }
+
+        form {
+            background-color: ghostwhite;
+            width: 500px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 2em;
+        }
+
+        input {
+            padding: 0.5em;
+            margin: 0.5em;
+        }
+
+        button {
+            margin: 1em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-container">
+        <h1>
+            Hello,
+        </h1>
+        <p>
+            Welcome! Create Your Contact Card
+        </p>
+
+        <a href="/contacts">Contacts Link</a>
+
+
+        <form id="myForm" action="/contact" method="post">
+
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName">
+
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName">
+
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email">
+
+            <label for="favoriteColor">Favorite Color</label>
+            <input type="text" id="favoriteColor" name="favoriteColor">
+
+            <label for="birthday">Birthday</label>
+            <input type="text" id="birthday" name="birthday">
+            <br>
+
+            <!-- submit -->
+            <input type="submit" value="Create Contact">
+        </form>
+    </div>
+    <script>
+        // JavaScript
+        const form = document.getElementById('myForm');
+        form.addEventListener('submit', handleSubmit);
+      
+        function handleSubmit(event) {
+          event.preventDefault(); // Prevent the default form submission
+      
+          // Get the form data
+          const formData = new FormData(form);
+      
+          // Prepare the data to be sent to the server
+          const data = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            favoriteColor: formData.get('favoriteColor'),
+            birthday: formData.get('birthday')
+          };
+      
+          // Send an AJAX request to the server-side script
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/', true);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                // Request was successful
+                const response = JSON.parse(xhr.responseText);
+                console.log(response.message);
+              } else {
+                // Request failed
+                console.error('Error:', xhr.status);
+              }
+            }
+          };
+          xhr.send(JSON.stringify(data));
+        }
+      </script>
+
+</body>
+
+</html>

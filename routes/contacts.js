@@ -1,18 +1,24 @@
-//code imports a module called 'contactsController' which contains functions that handle the logic for the '/contacts' route.
+// Import the necessary modules
 const express = require('express');
 const router = express.Router();
 const contactsController = require('../controller/contacts');
 
-// create a route that handles GET requests to the '/' endpoint and calls the getAllContacts function from the contactsController module.
+// Define routes for handling contact-related requests
+
+// GET all contacts
 router.get('/', contactsController.getAllContacts);
-// create another route that handles GET requests to the '/:id' endpoint and calls the getContactById function from the contactsController module, passing in the id parameter from the request URL.
+
+// GET a specific contact by ID
 router.get('/:id', contactsController.getContactById);
-//post
+
+// POST request to create a new contact
 router.post('/', contactsController.createContact);
-//put
+
+// PUT request to update a contact by ID
 router.put('/:id', contactsController.updateContact);
-//delete
+
+// DELETE request to delete a contact by ID
 router.delete('/:id', contactsController.deleteContact);
 
-//export the router object using module.exports so that it can be used in other parts of the application where this module is required. 
+// Export the router object to be used by other modules
 module.exports = router;

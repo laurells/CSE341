@@ -2,7 +2,7 @@
 
 const mongodb = require('../DB/connection');
 const { ObjectId } = require('mongodb');
-const collection = 'collection';
+const collection = 'contacts';
 const database = 'API-database';
 const faker = require('faker');
 const { validateRequest } = require('../model/contactsData');
@@ -21,7 +21,7 @@ const newIdTemplate = {
     id: String,
 }
 
-const getAllContacts = async (req, res, next) => {
+const getAllContacts = async (req, res) => {
     const result = await mongodb.getDb().db('API-database').collection(collection).find();
     result.toArray().then((list) => {
         res.setHeader('Content-Type', 'application/json');
@@ -30,64 +30,82 @@ const getAllContacts = async (req, res, next) => {
 };
 //create a function to retrieve a single document from the database collection 
 //use the _id field to identify the specific document requested.
+//The code validates the request parameters using the validateRequest function and newIdTemplate.
 const getContactById = async (req, res) => {
     try {
         const [valid, output] = validateRequest(req.params, newIdTemplate);
         if (!valid) {
+            // Invalid request params, send an error response
             res.status(500).json(`Invalid request params: ${output}`);
             console.log(req.params);
-            return
+            return;
         }
 
+        // Query the database to find a contact by _id
         const response = await mongodb.getDb().db(database)
             .collection(collection).find(
                 {
                     "_id": new ObjectId(output.id)
                 }
             ).toArray();
+
         if (response.length > 0) {
+            // Contact found, set Content-Type header and send response
             req.setHeader('Content-Type', 'application/json');
             res.status(200).json(response[0]);
         } else {
+            // Contact not found, send an error response
             res.status(500).json('Contact not found!');
         }
     } catch (err) {
+        // Error occurred, send an error response
         res.status(500).json(err);
     }
 };
 
+//The code creates a contact object from the request body, extracting the relevant fields.
 const createContact = async (req, res) => {
     try {
-        const [valid, output] = validateRequest(contact, newContactTemplate);
-        if (!valid) {
-            return res.status(400).json({ error: `Invalid request body: ${output}` });    
-        }
-        // Make sure birthday is not undefined before passing it to new Date()
-        if (output.birthday === undefined) {
-            return res.status(400).json({ error: "Invalid request body: birthday field is required" });
-        }
-        // Convert the birthday string to a Date object
-        output.birthday = new Date(output.birthday);
-        const response = await mongodb.getDb().db('API-database').collection('collection').insertOne(output);
-        if (response && response.acknowledged && response.ops && response.ops.length > 0) {
-            return res.status(201).json(response.ops[0]);
+        // Create a contact object from the request body
+        const contact = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            favoriteColor: req.body.favoriteColor,
+            birthday: req.body.birthday
+        };
+
+        // Insert the contact into the database
+        const response = await mongodb.getDb().db('API-database').collection(collection).insertOne(contact);
+
+        if (response.acknowledged) {
+            // Contact creation successful, send a success response
+            res.status(201).json(response);
         } else {
-            return res.status(500).json({ error: response.error || 'An error occurred while processing a new contact' });
+            // Contact creation failed, send an error response
+            res.status(500).json(response.error || 'Some error occurred while creating the contact.');
         }
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
+    } catch (error) {
+        // Error occurred, send an error response
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
 const deleteContact = async (req, res) => {
     try {
+        // Validate the request params
         const [valid, output] = validateRequest(req.params, newIdTemplate);
         if (!valid) {
+            // Invalid request params, send an error response
             res.status(400).json({ error: `Invalid request params: ${output}` });
             return;
         }
 
+        // Convert contactId to ObjectId
         const contactId = new ObjectId(output.id);
+
+        // Delete the contact from the database
         const response = await mongodb
             .getDb()
             .db('API-database')
@@ -95,11 +113,14 @@ const deleteContact = async (req, res) => {
             .deleteOne({ _id: contactId }, true);
 
         if (response.deletedCount > 0) {
+            // Contact deleted successfully, send a no content response
             res.status(204).send();
         } else {
+            // Contact not found, send an error response
             res.status(404).json({ error: "Contact not found" });
         }
     } catch (err) {
+        // Error occurred, send an error response
         console.error(err);
         res.status(500).json({ error: "An error occurred while deleting the contact" });
     }
@@ -107,35 +128,44 @@ const deleteContact = async (req, res) => {
 
 const updateContact = async (req, res) => {
     try {
-        const [paramsValid, paramsOutput] = validateRequest(req.params, newIdTemplate);
-        if (!paramsValid) {
-            res.status(400).json(`Invalid request params: ${paramsOutput}`);
-            console.log(req.params);
-            return;
-        }
+        // Convert userId to ObjectId
+        const userId = new ObjectId(req.params.id);
+    
+        // Create a contact object from the request body
+        const contact = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            favoriteColor: req.body.favoriteColor,
+            birthday: req.body.birthday
+        };
 
-        const [bodyValid, bodyOutput] = validateRequest(req.body, newContactTemplate);
-        if (!bodyValid) {
-            res.status(400).json(`Invalid request body: ${bodyOutput}`);
-            console.log(req.body);
-            return;
-        }
+        // Update the contact in the database
+        const response = await mongodb
+            .getDb()
+            .db('API-database')
+            .collection(collection)
+            .replaceOne({ _id: userId }, contact);
 
-        const contactId = new ObjectId(paramsOutput.id);
-        const response = await mongodb.getDb().db("API-database").collection("collection").replaceOne({ _id: contactId }, bodyOutput);
+        console.log(response);
 
         if (response.modifiedCount > 0) {
+            // Contact updated successfully, send a no content response
             res.status(204).send();
         } else {
-            res.status(500).json(response.error || "An error occurred while updating the contact");
+            // Contact update failed, send an error response
+            res.status(500).json(response.error || 'Some error occurred while updating the contact.');
         }
-    } catch (err) {
-        res.status(500).json(err);
+    } catch (error) {
+        // Error occurred, send an error response
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
 const createRandomContact = async (req, res) => {
     try {
+        // Generate random contact data using faker library
         const contact = {
             firstName: faker.name.firstName(),
             lastName: faker.name.lastName(),
@@ -144,18 +174,24 @@ const createRandomContact = async (req, res) => {
             birthday: faker.date.between('1940-01-01', '2022-01-01')
         };
 
+        // Validate the generated contact data
         const [valid, output] = validateRequest(contact, newContactTemplate);
         if (!valid) {
+            // Invalid request body, send an error response
             return res.status(400).json({ error: `Invalid request body: ${output}` });
         }
 
+        // Insert the validated contact into the database
         const response = await mongodb.getDb().db('API-database').collection(collection).insertOne(output);
         if (response.acknowledged) {
+            // Contact created successfully, send a response with the inserted document
             return res.status(201).json(response);
         } else {
-            return res.status(500).json({ error: response.error || 'Encountered and error while creating a contact' });
+            // Error occurred while creating the contact, send an error response
+            return res.status(500).json({ error: response.error || 'Encountered an error while creating a contact' });
         }
     } catch (err) {
+        // Error occurred, send an error response
         return res.status(500).json({ error: err.message });
     }
 };
